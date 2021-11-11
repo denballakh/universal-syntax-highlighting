@@ -1,0 +1,200 @@
+%YAML 1.2
+---
+name: Universal
+file_extensions:
+  - txt
+scope: source
+
+variables:
+  identifier: '\b[[:alpha:]_]{{identifier_continue}}*\b'
+  identifier_constant: '\b(?:[\p{Lu}_][\p{Lu}_\d]*)?[\p{Lu}]{2,}[\p{Lu}_\d]*\b'  # require 2 consecutive upper-case letters
+  digits: (?:\d+(?:_\d+)*)
+  exponent: (?:[eE][-+]?{{digits}})
+
+contexts:
+  main:
+    - include: constants
+    - include: comments
+    - include: numbers
+    - include: operators
+    - include: types
+    - include: strings
+    - include: function-call
+    - include: keywords
+    - include: names
+
+  constants:
+    - match: |-
+        (?x)\b(?:
+          true|false|
+          True|False|
+          nullptr|NULL|
+          None
+        )
+      scope: constant
+
+  names:
+    - match: '{{identifier_constant}}'
+      scope: constant
+
+  comments:
+    - match: (\#)(include|pragma|define|ifdef|ifndef|else|endif|undef|if)
+      captures:
+        1: punctuation.separator
+        2: keyword.control
+
+    - match: \#.*
+      scope: comment
+    
+    - match: //.*
+      scope: comment
+
+    - match: /\*.*
+      scope: comment
+
+    - match: .*\*/
+      scope: comment
+
+  function-call:
+    - match: (\w+)(\()
+      captures: 
+        1: variable.function
+        2: punctuation.separator
+
+
+
+  operators:
+    - match: '->|=>'
+      scope: punctuation.separator
+    
+    - match: '>=|>|<=|<|==|!='
+      scope: keyword.operator
+
+    - match: '\+=|-=|\*\*=|\*=|//=|/=|&=|\|=|@=|:=|='
+      scope: keyword.operator
+    
+    - match: '\+\+|\+|--|-|\*\*|\*|/|//|%|@|!|~|\|\||\|'
+      scope: keyword.operator
+    
+    - match: '\(|\)|\[|\]|{|}'
+      scope: punctuation.separator
+    
+    - match: ',|:|\.\.|\.|;'
+      scope: punctuation.separator
+
+
+  strings:
+    - match: '[a-zA-Z]?("|''|`)'
+      scope: punctuation.definition
+      push:
+        - match: \\u....|\\x..|\\.
+          scope: constant.character.escape
+
+        - match: \1
+          scope: punctuation.definition
+          pop: true
+
+        - match: ^
+          pop: true
+
+        - match: .
+          scope: string
+
+
+  types:
+    - match: |-
+        (?x)\b(?:
+          (u?int(8|16|32|64)_t)|
+          wchar_t|time_t|clock_t|
+
+          int|char|float|double|bool|
+          str|bytes|bytearray|list|dict|set|frozenset|tuple|
+          unsigned|signed|long|short|
+
+          integer|string|
+
+        )\b
+      scope: support.type
+
+  keywords:
+    - match: |-
+        (?x)\b(?:
+          self|cls|this|result|_
+        )\b
+      scope: variable.language
+
+    - match: |-
+        (?x)\b(?:
+          import|from|
+          in|as|to|
+
+          begin|end|var|let|
+
+          for|
+          while|
+          do|
+          repeat|
+          foreach|
+
+          const|global|local|nonlocal|
+          static|virtual|abstract|
+
+          try|except|catch|raise|throw|
+
+          if|
+          else|
+          elif|
+
+          return|
+
+          match|case|switch|
+
+          public|private|protected
+
+        )\b
+      scope: keyword.control
+
+    - match: |-
+        (?x)\b(?:
+
+          def|function|lambda|procedure|
+
+          class|struct|record|
+          typedef|template|typename|
+
+          new|delete
+        )\b
+      scope: keyword.declaration
+
+  numbers:
+    - match: \b(0[xX])((?:_?\h)+)
+      scope: meta.number.integer.hexadecimal.python
+      captures:
+        1: constant.numeric.base.python
+        2: constant.numeric.value.python
+    # octal
+    - match: \b(0[oO])((?:_?[0-7])+)
+      scope: meta.number.integer.octal.python
+      captures:
+        1: constant.numeric.base.python
+        2: constant.numeric.value.python
+    # binary
+    - match: \b(0[bB])((?:_?[01])*)
+      scope: meta.number.integer.binary.python
+      captures:
+        1: constant.numeric.base.python
+        2: constant.numeric.value.python
+    # floating point
+    - match: |-
+        (?x:
+          \b{{digits}} (?: (\.) {{digits}}? {{exponent}}? | {{exponent}} )
+          | (\.) {{digits}} {{exponent}}?
+        )
+      scope: meta.number.float.decimal.python constant.numeric.value.python
+      captures:
+        1: punctuation.separator.decimal.python
+        2: punctuation.separator.decimal.python
+    # integer
+    - match: \b([1-9][\d_]*|0)\b
+      scope: meta.number.integer.decimal.python constant.numeric.value.python
+
