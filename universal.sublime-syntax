@@ -3,7 +3,10 @@
 name: Universal
 file_extensions:
   - txt
+  - log
+  - json
 scope: source
+# first_line_match: .*
 
 variables:
   identifier: '\b[[:alpha:]_]{{identifier_continue}}*\b'
@@ -14,13 +17,13 @@ variables:
 contexts:
   main:
     - include: constants
+    - include: strings
     - include: comments
     - include: numbers
     - include: operators
     - include: types
-    - include: strings
-    - include: function-call
     - include: keywords
+    - include: function-call
     - include: names
 
   constants:
@@ -28,7 +31,7 @@ contexts:
         (?x)\b(?:
           true|false|
           True|False|
-          nullptr|NULL|
+          nullptr|NULL|null|nil|none|
           None
         )
       scope: constant
@@ -52,7 +55,7 @@ contexts:
     - match: /\*.*
       scope: comment
 
-    - match: .*\*/
+    - match: \s*\*/
       scope: comment
 
   function-call:
@@ -67,19 +70,19 @@ contexts:
     - match: '->|=>'
       scope: punctuation.separator
     
-    - match: '>=|>|<=|<|==|!='
+    - match: '<>|>=|>|<=|<|==|!='
       scope: keyword.operator
 
-    - match: '\+=|-=|\*\*=|\*=|//=|/=|&=|\|=|@=|:=|='
+    - match: '\+=|-=|\*\*=|\*=|//=|/=|&=|\|=|@=|::=|:=|='
       scope: keyword.operator
     
-    - match: '\+\+|\+|--|-|\*\*|\*|/|//|%|@|!|~|\|\||\|'
+    - match: '\+\+|\+|--|-|\*\*|\*|/|//|%|@|!|~|\|\||\|\&\&|\&|\^'
       scope: keyword.operator
     
     - match: '\(|\)|\[|\]|{|}'
       scope: punctuation.separator
     
-    - match: ',|:|\.\.|\.|;'
+    - match: ',|:|\.\.\.|\.\.|\.|;'
       scope: punctuation.separator
 
 
@@ -104,14 +107,17 @@ contexts:
   types:
     - match: |-
         (?x)\b(?:
-          (u?int(8|16|32|64)_t)|
-          wchar_t|time_t|clock_t|
+          (u?int(8|16|32|64)_t)
+          |wchar_t|time_t|clock_t
 
-          int|char|float|double|bool|
-          str|bytes|bytearray|list|dict|set|frozenset|tuple|
-          unsigned|signed|long|short|
+          |int|char|float|double|bool
+          |str|bytes|bytearray|list|dict|set|frozenset|tuple|unicode
+          |object
+          |bint
+          
+          |unsigned|signed|long|short
 
-          integer|string|
+          |integer|string|boolean|single
 
         )\b
       scope: support.type
@@ -126,30 +132,41 @@ contexts:
     - match: |-
         (?x)\b(?:
           import|from|
-          in|as|to|
+          cimport|fused|
+          in|as|to|of|is|
 
-          begin|end|var|let|
+          begin|end|var|let|type|
+          uses|program|module|library|
 
           for|
           while|
           do|
           repeat|
           foreach|
+          break|continue|
 
           const|global|local|nonlocal|
-          static|virtual|abstract|
+          static|virtual|abstract|override|
+          volatile|noexcept|
+          property|read|write|
+          extern|inline|
 
           try|except|catch|raise|throw|
 
-          if|
+          constructor|destructor|
+
+          if|then|
           else|
           elif|
 
           return|
 
-          match|case|switch|
+          match|case|switch|default|
+          with|yield|
 
-          public|private|protected
+          public|private|protected|
+
+          and|or|xor|shr|shl
 
         )\b
       scope: keyword.control
@@ -158,6 +175,7 @@ contexts:
         (?x)\b(?:
 
           def|function|lambda|procedure|
+          cdef|cpdef|ctypedef|
 
           class|struct|record|
           typedef|template|typename|
