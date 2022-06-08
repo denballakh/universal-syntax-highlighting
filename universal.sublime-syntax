@@ -76,7 +76,7 @@ contexts:
     - match: '\+=|-=|\*\*=|\*=|//=|/=|&=|\|=|@=|::=|:=|='
       scope: keyword.operator
     
-    - match: '\+\+|\+|--|-|\*\*|\*|/|//|%|@|!|~|\|\||\|\&\&|\&|\^'
+    - match: '\+\+|\+|--|-|\*\*|\*|/|//|%|@|!|~|\|\||\||\&\&|\&|\^'
       scope: keyword.operator
     
     - match: '\(|\)|\[|\]|{|}'
@@ -119,6 +119,8 @@ contexts:
 
           |integer|string|boolean|single
 
+          |unknown|dword
+
         )\b
       scope: support.type
 
@@ -131,12 +133,12 @@ contexts:
 
     - match: |-
         (?x)\b(?:
-          import|from|
+          import|from|require|requires|
           cimport|fused|
-          in|as|to|of|is|
 
           begin|end|var|let|type|
           uses|program|module|library|
+          using|
 
           for|
           while|
@@ -144,29 +146,36 @@ contexts:
           repeat|
           foreach|
           break|continue|
+          goto|
 
           const|global|local|nonlocal|
           static|virtual|abstract|override|
-          volatile|noexcept|
+          volatile|noexcept|overload|
           property|read|write|
           extern|inline|
+          export|exports|
 
-          try|except|catch|raise|throw|
+          unit|interface|implementation|
+
+          try|except|catch|raise|throw|finally|
 
           constructor|destructor|
 
           if|then|
           else|
           elif|
+          pass|
+          assert|
 
-          return|
+          return|exit|
 
           match|case|switch|default|
           with|yield|
 
           public|private|protected|
 
-          and|or|xor|shr|shl
+          and|or|xor|shr|shl|not|
+          in|as|to|of|is
 
         )\b
       scope: keyword.control
@@ -213,6 +222,6 @@ contexts:
         1: punctuation.separator.decimal.python
         2: punctuation.separator.decimal.python
     # integer
-    - match: \b([1-9][\d_]*|0)\b
+    - match: \b([0-9][\d_]*|0)\b
       scope: meta.number.integer.decimal.python constant.numeric.value.python
 
